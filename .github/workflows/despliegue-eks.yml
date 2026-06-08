@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: us-east-1                  # Cambiar por tu región de AWS
-  ECR_REPOSITORY: ${{ECR_REPOSITORY}}      # SECRET de tu repo en ECR
-  EKS_CLUSTER_NAME: ${{EKS_CLUSTER}}      # SECRET de tu cluster
+  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY}}      # SECRET de tu repo en ECR
+  EKS_CLUSTER_NAME: ${{secrets.EKS_CLUSTER}}      # SECRET de tu cluster
 
 jobs:
   deploy:
