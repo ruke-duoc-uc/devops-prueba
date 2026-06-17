@@ -10,7 +10,7 @@ services:
       - DB_HOST=localhost
       - DB_PORT= 3306
       - DB_NAME= mi_bd
-      - DB_PASSWOR= 12345
+      - DB_PASSWORd= 12345
       - DB_USER= root 
     volumes:
       - ./logs:/app/logs
