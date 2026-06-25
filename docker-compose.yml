@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   app-spring:
     build:
@@ -7,16 +8,17 @@ services:
     working_dir: /app
     command: java -jar /app/app.jar
     environment:
-      - DB_HOST=localhost
-      - DB_PORT= 3306
-      - DB_NAME= mi_bd
-      - DB_PASSWORD= 12345
-      - DB_USER= root 
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_NAME=mi_bd
+      - DB_PASSWORD=12345
+      - DB_USER=root
     volumes:
       - ./logs:/app/logs
     ports:
-    # Puerto host:contenedor
       - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - monitoring-net
     healthcheck:
@@ -24,55 +26,69 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
   loki:
     image: grafana/loki:2.9.0
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-data:/tmp/loki
     networks:
       - monitoring-net
+
   promtail:
     image: grafana/promtail:2.9.0
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./promtail/promtail-config.yml:/etc/promtail/config.yml
-      - ./logs:/var/log/spring # Mapea la carpeta de logs de tu app
-    command: -config.file=/etc/promtail/config.yml
+      - ./logs:/app/logs
     networks:
       - monitoring-net
+
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
-    command: [ "-config.file=/etc/tempo.yaml" ] # <-- Faltaba indicarle que lea el archivo
-    volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml     # <-- Faltaba el mapeo del archivo local
+    command: ["-config.file=/etc/tempo.yaml"]
     ports:
-      - "3200:3200"  # Grafana UI/API interna de Tempo
-      - "4317:4317"  # OTLP gRPC Ingest
-      - "4318:4318"  # OTLP HTTP Ingest (El que mapea Spring Boot)
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/tmp/tempo
     networks:
       - monitoring-net
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   container_name: prometheus
-  #   volumes:
-  #   # Inyectamos nuestra configuración personalizada
-  #   - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-  #   ports:
-  #   - "9090:9090"
-  #   networks:
-  #   - monitoring-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-data:/prometheus
+    networks:
+      - monitoring-net
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     environment:
-    - GF_SECURITY_ADMIN_USER=admin
-    - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
-    - "3000:3000"
-    # depends_on:
-    # - prometheus
+      - "3000:3000"
+    volumes:
+      - ./grafana-data:/var/lib/grafana
     networks:
-    - monitoring-net
+      - monitoring-net
+
 networks:
   monitoring-net:
     driver: bridge
