@@ -19,7 +19,7 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login en Amazon ECR (runner)
+      - name: Login en Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build imagen Frontend y push a ECR
@@ -28,13 +28,12 @@ jobs:
           docker tag rent-car:latest ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
-      - name: Descargar Task Definition actual y corregir modo de red
+      - name: Descargar Task Definition actual y limpiar estructura
         run: |
           aws ecs describe-task-definition \
             --task-definition ${{ secrets.ECS_TASK_DEFINITION_NAME }} \
             --query taskDefinition > raw-task-definition.json
-          # Limpiamos los metadatos de AWS y forzamos el modo "bridge" para evitar colisiones de puerto
-          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) | .networkMode = "bridge"' raw-task-definition.json > task-definition.json
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' raw-task-definition.json > task-definition.json
 
       - name: Actualizar Tag de la imagen en la Task Def
         id: render-task-def
@@ -51,4 +50,4 @@ jobs:
           service: ${{ secrets.ECS_SERVICE_NAME }}
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: false
-          force-new-deployment: true
+          force-
