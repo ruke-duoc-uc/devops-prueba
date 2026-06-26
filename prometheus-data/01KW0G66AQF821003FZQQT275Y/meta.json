@@ -1,0 +1,18 @@
+{
+	"ulid": "01KW0G66AQF821003FZQQT275Y",
+	"minTime": 1782417606201,
+	"maxTime": 1782424800000,
+	"stats": {
+		"numSamples": 15123,
+		"numFloatSamples": 15123,
+		"numSeries": 105,
+		"numChunks": 112
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01KW0G66AQF821003FZQQT275Y"
+		]
+	},
+	"version": 1
+}
