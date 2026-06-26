@@ -28,12 +28,13 @@ jobs:
           docker tag rent-car:latest ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
-      - name: Descargar Task Definition actual
+      - name: Descargar Task Definition actual y corregir modo de red
         run: |
           aws ecs describe-task-definition \
             --task-definition ${{ secrets.ECS_TASK_DEFINITION_NAME }} \
             --query taskDefinition > raw-task-definition.json
-          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' raw-task-definition.json > task-definition.json
+          # Limpiamos los metadatos de AWS y forzamos el modo "bridge" para evitar colisiones de puerto
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy) | .networkMode = "bridge"' raw-task-definition.json > task-definition.json
 
       - name: Actualizar Tag de la imagen en la Task Def
         id: render-task-def
