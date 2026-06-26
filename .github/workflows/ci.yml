@@ -24,7 +24,7 @@ jobs:
 
       - name: Build imagen Frontend y push a ECR
         run: |
-          docker build -t rent-car .
+          docker build -t rent-car-frontend .
           docker tag rent-car:latest ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
           docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
