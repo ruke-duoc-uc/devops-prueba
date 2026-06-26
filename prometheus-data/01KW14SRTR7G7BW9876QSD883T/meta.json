@@ -1,0 +1,18 @@
+{
+	"ulid": "01KW14SRTR7G7BW9876QSD883T",
+	"minTime": 1782439208819,
+	"maxTime": 1782446400000,
+	"stats": {
+		"numSamples": 8277,
+		"numFloatSamples": 8277,
+		"numSeries": 105,
+		"numChunks": 105
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01KW14SRTR7G7BW9876QSD883T"
+		]
+	},
+	"version": 1
+}
