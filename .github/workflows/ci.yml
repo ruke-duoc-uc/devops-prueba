@@ -22,18 +22,11 @@ jobs:
       - name: Login en Amazon ECR (runner)
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build imagen Frontend y push a ECR
         run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            -t ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest \
-            --push .
+          docker build -t rent-car .
+          docker tag rent-car:latest ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
+          docker push ${{ secrets.ECR_REPO_URL_FRONTEND }}:latest
 
       - name: Descargar Task Definition actual
         run: |
@@ -57,3 +50,4 @@ jobs:
           service: ${{ secrets.ECS_SERVICE_NAME }}
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: false
+          
